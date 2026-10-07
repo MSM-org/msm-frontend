@@ -10,6 +10,7 @@ import hseQuality from './pages/public/designs/hse-quality.html?raw'
 import Navbar from './components/layout/Navbar'
 import Footer from './components/layout/Footer'
 import Seo from './components/Seo'
+import { prefixMarkupPaths, withoutBase } from './utils/sitePath'
 
 // Only trusted, local, script-free design exports are rendered here.
 function DesignPage({ markup, title }) {
@@ -42,7 +43,7 @@ function DesignPage({ markup, title }) {
     const href = event.target.closest('a')?.getAttribute('href')
     if (href?.startsWith('/') && !event.ctrlKey && !event.metaKey && !event.shiftKey && event.button === 0) {
       event.preventDefault()
-      navigate(href)
+      navigate(withoutBase(href, import.meta.env.BASE_URL))
     }
   }
   function handleFiles(event) {
@@ -73,7 +74,7 @@ function DesignPage({ markup, title }) {
     message.classList.remove('hidden')
     message.setAttribute('role', 'status')
   }
-  return <div id="page-content" ref={root} onClick={handleClick} onChange={handleFiles} onSubmit={handleSubmit} dangerouslySetInnerHTML={{ __html: markup }} />
+  return <div id="page-content" ref={root} onClick={handleClick} onChange={handleFiles} onSubmit={handleSubmit} dangerouslySetInnerHTML={{ __html: prefixMarkupPaths(markup, import.meta.env.BASE_URL) }} />
 }
 function PublicLayout() {
   return <div className="design-page"><Seo /><Navbar /><Outlet /><Footer /></div>
@@ -100,6 +101,6 @@ export function AppRoutes() {
   </Routes>
 }
 function App() {
-  return <BrowserRouter><AppRoutes /></BrowserRouter>
+  return <BrowserRouter basename={import.meta.env.BASE_URL}><AppRoutes /></BrowserRouter>
 }
 export default App

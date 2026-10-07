@@ -2,6 +2,16 @@ import test from 'node:test'
 import assert from 'node:assert/strict'
 import { readFile } from 'node:fs/promises'
 import { aliases, getSeo, pages, renderSeoHead, validateSiteUrl } from '../src/seo/config.js'
+import { normalizeBase, prefixMarkupPaths, withBase, withoutBase } from '../src/utils/sitePath.js'
+
+const base = normalizeBase(process.env.VITE_BASE_PATH || '/')
+
+test('repository paths preserve links, anchors and external URLs', () => {
+  assert.equal(withBase('/contact#rfqForm', '/msm-frontend/'), '/msm-frontend/contact#rfqForm')
+  assert.equal(withoutBase('/msm-frontend/contact#rfqForm', '/msm-frontend/'), '/contact#rfqForm')
+  assert.equal(withoutBase('/other/services', '/msm-frontend/'), '/other/services')
+  assert.equal(prefixMarkupPaths('<a href="/projects">Projects</a><img src="/logo.svg"><a href="//external.test">External</a>', '/msm-frontend/'), '<a href="/msm-frontend/projects">Projects</a><img src="/msm-frontend/logo.svg"><a href="//external.test">External</a>')
+})
 
 test('canonical pages are unique and aliases consolidate signals', () => {
   const origin = 'https://msm.test'
@@ -35,7 +45,11 @@ test('built pages expose content, links and unique metadata without JavaScript',
     assert.equal((html.match(/<title\b/g) || []).length, 1, route)
     assert.equal((html.match(/name="description"/g) || []).length, 1, route)
     assert.ok(html.includes('servicesmsmtechnical@gmail.com'), route)
-    for (const link of ['/services', '/projects', '/hse-quality', '/contact']) assert.ok(html.includes(`href="${link}"`), `${route}: ${link}`)
+    for (const link of ['/services', '/projects', '/hse-quality', '/contact']) assert.ok(html.includes(`href="${withBase(link, base)}"`), `${route}: ${link}`)
+    assert.ok(html.includes(`src="${base}msm-mark.svg"`))
+    const assets = [...html.matchAll(/(?:src|href)="([^\"]*\/assets\/[^\"]+)"/g)]
+    assert.ok(assets.length)
+    for (const [, url] of assets) assert.ok(url.startsWith(`${base}assets/`), url)
   }
   const missing = await readFile('dist/404.html', 'utf8')
   assert.ok(missing.includes('noindex, follow'))

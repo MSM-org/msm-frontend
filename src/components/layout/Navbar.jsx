@@ -37,7 +37,7 @@ export default function Navbar() {
 </div>
 <div className="h-20 max-w-7xl mx-auto px-6 lg:px-12 flex items-center justify-between">
 <div className="flex items-center gap-space-md">
-<img alt="MSM Technical Services Corporate Logo" className="h-8 w-auto object-contain" src="/msm-mark.svg"/>
+<img alt="MSM Technical Services Corporate Logo" className="h-8 w-auto object-contain" src={`${import.meta.env.BASE_URL}msm-mark.svg`}/>
 <div className="flex flex-col">
 <span className="font-title-md text-title-md uppercase tracking-tight text-primary leading-none">MSM TECHNICAL SERVICES</span>
 <span className="font-label-sm text-label-sm uppercase tracking-widest text-secondary mt-1">L.L.C • DUBAI, UAE</span>
